@@ -21,5 +21,5 @@ Spin up a Counterstrike 1.6 server in AWS to keep team entertained during Covid-
 # ENSURE you have AWS_PROFILE/AWS_ACCESS_KEY_ID etc exported
 
 # deploy network layer and server
-./run.sh
+./01-deploy.sh
 ```

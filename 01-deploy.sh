@@ -3,22 +3,27 @@
 # ensure AWS_PROFILE/SECRET_ACCESS are set before
 
 readonly FILE_DIRECTORY=$(dirname "${BASH_SOURCE[0]}")
-readonly STACK_NAME="cs-server"
+readonly STACK_NAME="cs-gaming-${RANDOM}"
 readonly BATCH="batch-${RANDOM}"
 readonly NOW=$(date +%Y-%m-%dT%H:%M:%S)
 readonly TAGS=("ApplicationName=cs-server" "Batch=${BATCH}" "DateCreation=${NOW}" "StackName=${STACK_NAME}" "Owner=jujhar@jujhar.com")
-readonly AWS_DEFAULT_REGION="eu-west-1"
-readonly UserDataScript="$(< ${FILE_DIRECTORY}/cloudFormation/ec2-user-data)"
-readonly MyIpAddress="$(curl -s https://ifconfig.me/)"
+readonly AWS_DEFAULT_REGION="eu-west-2"
+readonly UserDataScript="$(< ${FILE_DIRECTORY}/cloudFormation/ec2-user-data.sh)"
+readonly myIpAddress="$(curl -s https://ifconfig.me/)"
 
 # deploy network
 aws cloudformation deploy \
-  --template-file "${FILE_DIRECTORY}/cloudFormation/01-network.yml" \
-  --stack-name "${STACK_NAME}" \
+  --template-file "${FILE_DIRECTORY}/cloudFormation/01-networking.yml" \
+  --stack-name "${STACK_NAME}-net" \
   --capabilities CAPABILITY_IAM \
   --tags "${TAGS[@]}" \
   --no-fail-on-empty-changeset \
   --region "${AWS_DEFAULT_REGION}"
+
+# have to wait for VPC  
+aws cloudformation wait \
+stack-exists \
+--stack-name "${STACK_NAME}-net"
 
 echo "Finding the current Amazon Linuz 2 AMI"
 readonly LINUX2_AMI=$(aws ec2 describe-images \
@@ -31,12 +36,14 @@ echo "This is the current Linux 2 AMI: ${LINUX2_AMI}"
 # deploys server
 aws cloudformation deploy \
   --template-file "${FILE_DIRECTORY}/cloudFormation/02-server.yml" \
-  --stack-name "${STACK_NAME}" \
+  --stack-name "${STACK_NAME}-svr" \
   --capabilities CAPABILITY_IAM \
   --tags "${TAGS[@]}" \
   --no-fail-on-empty-changeset \
   --parameter-overrides \
-  Linux2AMI="${LINUX2_AMI}" \
-  UserDataScript="${UserDataScript}" \
-  MyIpAddress="${MyIpAddress}" \
+      Linux2Ami="${LINUX2_AMI}" \
+      UserDataScript="${UserDataScript}" \
+      myIpAddress="${myIpAddress}" \
+      vpcName="${STACK_NAME}-net-vpc" \
+      zoneName="${STACK_NAME}-net-pub-a" \
   --region "${AWS_DEFAULT_REGION}"

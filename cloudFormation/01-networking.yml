@@ -1,4 +1,4 @@
-Description: VPC architecture config for countertstrike
+Description: VPC setup for Counterstrike gaming server
 
 # Default parameters can be overridden by command line execution
 Parameters:
@@ -6,17 +6,15 @@ Parameters:
     Description:
       "List of AZs"
     Type: CommaDelimitedList
-    Default: eu-west-1a
+    Default: eu-west-2a
   VpcCidr:
-    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$"
     Description: "CIDR block for the VPC"
     Type: String
-    Default: "172.16.99.0/28" # 16 addresses should be more than enough
+    Default: "172.16.99.0/27" # 32 total addresses should be more than enough
   PubASubnetCidr:
-    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$"
     Description: "CIDR block for our subnet"
     Type: String
-    Default: "172.16.99.0/30" # 4 addresses
+    Default: "172.16.99.0/28" # 16 addresses
 
 Resources:
   # Setup vpc
@@ -29,7 +27,7 @@ Resources:
       EnableDnsSupport: true
       Tags:
         - Key: Name
-          Value: "cs-vpc"
+          Value: !Sub "${AWS::StackName}-vpc"
 
   # public subnet AZ-a
   SubnetPubA:
@@ -41,7 +39,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: "cs-public-a"
+          Value: !Sub "${AWS::StackName}-pub-a"
         - Key: SubnetType
           Value: Public
         - Key: Tier
@@ -53,7 +51,7 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: "cs-igw"
+          Value: !Sub "${AWS::StackName}-igw"
 
   # Attaches IGW to vpc
   AttachInternetGateway:
@@ -67,7 +65,7 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: "cs-public-rt"
+          Value: !Sub "${AWS::StackName}-pub-rt"
         - Key: Network
           Value: Public
       VpcId: !Ref VPC
@@ -85,11 +83,5 @@ Outputs:
   VPC:
     Description: VPC ID
     Export:
-      Name: "cs-vpc"
+      Name: !Sub "${AWS::StackName}-vpc"
     Value: !Ref VPC
-
-  PubAsubnet:
-    Description: SubnetPubA ID
-    Value: SubnetPubA
-    Export:
-      Name: "cs-public-a"
