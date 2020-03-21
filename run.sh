@@ -9,6 +9,7 @@ readonly NOW=$(date +%Y-%m-%dT%H:%M:%S)
 readonly TAGS=("ApplicationName=cs-server" "Batch=${BATCH}" "DateCreation=${NOW}" "StackName=${STACK_NAME}" "Owner=jujhar@jujhar.com")
 readonly AWS_DEFAULT_REGION="eu-west-1"
 readonly UserDataScript="$(< ${FILE_DIRECTORY}/cloudFormation/ec2-user-data)"
+readonly MyIpAddress="$(curl -s https://ifconfig.me/)"
 
 # deploy network
 aws cloudformation deploy \
@@ -37,4 +38,5 @@ aws cloudformation deploy \
   --parameter-overrides \
   Linux2AMI="${LINUX2_AMI}" \
   UserDataScript="${UserDataScript}" \
+  MyIpAddress="${MyIpAddress}" \
   --region "${AWS_DEFAULT_REGION}"
