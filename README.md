@@ -1,5 +1,7 @@
 # CounterStrike Server
 
+![cs-logo](logo.jpg)
+
 Spin up a Counterstrike 1.6 server in AWS to keep team entertained during Covid-19 Crisis
 
 ## Architecture
