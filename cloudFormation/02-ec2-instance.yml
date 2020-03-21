@@ -1,0 +1,93 @@
+Description: cs-go-instance
+
+Parameters:
+  # inject in the latest AMI
+  Linux2Ami:
+    Type: String
+  MyIpAddress:
+    Type: String
+  UserDataScript:
+    Type: String
+
+Resources:
+  CsLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      IamInstanceProfile: !Ref CsServerInstanceProfile
+      ImageId: !Ref Linux2Ami
+      InstanceMonitoring: false
+      InstanceType: t2.micro
+      SecurityGroups:
+        - CsServerSecurityGroup
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          echo "this worked " | tee -a /worked.txt
+      # UserData:
+      #   Fn::Base64: !Sub UserDataScript
+
+  # ec2 iam-instance-profile
+  CsServerInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref CsServerInstanceRole
+
+  # roles attached to instance-profile
+  CsServerInstanceRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - ec2.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Path: "/"
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+
+  # which ports open on this box
+  CsServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG for cs server
+      GroupName: cs-server-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref MyIpAddress
+      VpcId:
+        Fn::ImportValue: "cs-vpc"
+      Tags:
+        - Key: Name
+          Value: cs-server-sg
+
+  # toggle the min and max size to have instances deployed
+  BastionAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      Cooldown: "60"
+      HealthCheckGracePeriod: 10
+      HealthCheckType: EC2
+      LaunchConfigurationName: !Ref CsLaunchConfig
+      MaxSize: "0"
+      MinSize: "0"
+      Tags:
+        - Key: Name
+          Value: CsAsg
+          PropagateAtLaunch: true
+      VPCZoneIdentifier:
+        - Fn::ImportValue: "cs-public-a"
+
+  # SecurityGroups:
+  #   - Fn::ImportValue: !Sub ez-publish-02-${Environment}-security-groups-bastion-security-group

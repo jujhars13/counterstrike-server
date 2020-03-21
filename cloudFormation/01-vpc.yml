@@ -4,7 +4,7 @@ Description: VPC architecture config for countertstrike
 Parameters:
   AvailabilityZones:
     Description:
-      "List of Azs"
+      "List of AZs"
     Type: CommaDelimitedList
     Default: eu-west-1a
   VpcCidr:
