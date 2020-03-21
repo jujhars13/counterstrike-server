@@ -1,0 +1,8 @@
+Description: cs-go-instance
+
+Parameters:
+  # inject in the latest AMI
+  Linux2AMI:
+    Type: String
+
+Resources:

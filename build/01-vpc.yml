@@ -2,14 +2,21 @@ Description: VPC architecture config for countertstrike
 
 # Default parameters can be overridden by command line execution
 Parameters:
+  AvailabilityZones:
+    Description:
+      "List of Azs"
+    Type: CommaDelimitedList
+    Default: eu-west-1a
   VpcCidr:
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$"
     Description: "CIDR block for the VPC"
     Type: String
-    Default: 172.16.99.0/28 # 16 addresses should be more than enough
+    Default: "172.16.99.0/28" # 16 addresses should be more than enough
   PubASubnetCidr:
-    Description: "30CIDR block for our subnet"
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$"
+    Description: "CIDR block for our subnet"
     Type: String
-    Default: 172.16.99.0/30 # 4 addresses
+    Default: "172.16.99.0/30" # 4 addresses
 
 Resources:
   # Setup vpc
@@ -22,19 +29,19 @@ Resources:
       EnableDnsSupport: true
       Tags:
         - Key: Name
-          Value: !Sub "cs-vpc"
+          Value: "cs-vpc"
 
   # public subnet AZ-a
   SubnetPubA:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: eu-west-1a
+      AvailabilityZone: !Select [0, !Ref AvailabilityZones]
       CidrBlock: !Ref PubASubnetCidr
       VpcId: !Ref VPC
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub "cs-public-a"
+          Value: "cs-public-a"
         - Key: SubnetType
           Value: Public
         - Key: Tier
@@ -46,11 +53,10 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub "cs-igw"
+          Value: "cs-igw"
 
   # Attaches IGW to vpc
   AttachInternetGateway:
-    DependsOn: InternetGateway
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       InternetGatewayId: !Ref InternetGateway
@@ -61,7 +67,7 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub "${AWS::StackName}-route-table-public"
+          Value: "cs-public-rt"
         - Key: Network
           Value: Public
       VpcId: !Ref VPC
@@ -79,11 +85,11 @@ Outputs:
   VPC:
     Description: VPC ID
     Export:
-      Name: !Sub "cs-vpc"
+      Name: "cs-vpc"
     Value: !Ref VPC
 
   PubAsubnet:
     Description: SubnetPubA ID
-    Value: !Ref SubnetPubA
+    Value: SubnetPubA
     Export:
-      Name: !Sub "cs-public-a"
+      Name: "cs-public-a"
