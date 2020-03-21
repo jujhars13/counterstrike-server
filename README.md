@@ -15,3 +15,11 @@ Spin up a Counterstrike 1.6 server in AWS to keep team entertained during Covid-
   - configured with integrated user-data script
 
 ## To Run
+
+```bash
+
+# ENSURE you have AWS_PROFILE/AWS_ACCESS_KEY_ID etc exported
+
+# deploy network layer and server
+./run.sh
+```
