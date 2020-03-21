@@ -8,6 +8,9 @@ Parameters:
     Type: String
   UserDataScript:
     Type: String
+  SpotInstancePrice:
+    Type: String
+    Default: "0.030"
 
 Resources:
   CsLaunchConfig:
@@ -16,7 +19,8 @@ Resources:
       IamInstanceProfile: !Ref CsServerInstanceProfile
       ImageId: !Ref Linux2Ami
       InstanceMonitoring: false
-      InstanceType: t2.micro
+      InstanceType: c5.large
+      SpotPrice: !Ref SpotInstancePrice
       SecurityGroups:
         - CsServerSecurityGroup
       UserData:
@@ -24,7 +28,7 @@ Resources:
           #!/bin/bash
           echo "this worked " | tee -a /worked.txt
       # UserData:
-      #   Fn::Base64: !Sub UserDataScript
+      #   Fn::Base64: !Ref UserDataScript
 
   # ec2 iam-instance-profile
   CsServerInstanceProfile:
