@@ -1,0 +1,89 @@
+Description: VPC architecture config for countertstrike
+
+# Default parameters can be overridden by command line execution
+Parameters:
+  VpcCidr:
+    Description: "CIDR block for the VPC"
+    Type: String
+    Default: 172.16.99.0/28 # 16 addresses should be more than enough
+  PubASubnetCidr:
+    Description: "30CIDR block for our subnet"
+    Type: String
+    Default: 172.16.99.0/30 # 4 addresses
+
+Resources:
+  # Setup vpc
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      InstanceTenancy: default
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub "cs-vpc"
+
+  # public subnet AZ-a
+  SubnetPubA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-west-1a
+      CidrBlock: !Ref PubASubnetCidr
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub "cs-public-a"
+        - Key: SubnetType
+          Value: Public
+        - Key: Tier
+          Value: Public
+
+  # creates IGW
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "cs-igw"
+
+  # Attaches IGW to vpc
+  AttachInternetGateway:
+    DependsOn: InternetGateway
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-route-table-public"
+        - Key: Network
+          Value: Public
+      VpcId: !Ref VPC
+
+  # Public Route table to InternetGateway in each AZ
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachInternetGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+Outputs:
+  VPC:
+    Description: VPC ID
+    Export:
+      Name: !Sub "cs-vpc"
+    Value: !Ref VPC
+
+  PubAsubnet:
+    Description: SubnetPubA ID
+    Value: !Ref SubnetPubA
+    Export:
+      Name: !Sub "cs-public-a"
