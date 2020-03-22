@@ -79,6 +79,12 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
 
+  PublicRouteTableAssociationA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetPubA
+      RouteTableId: !Ref PublicRouteTable
+
 # Exporting outputs to use in downstream stacks
 Outputs:
   StackName:
