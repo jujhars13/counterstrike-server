@@ -21,7 +21,7 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: !Ref VpcCidr
+      CidrBlock: !Sub ${VpcCidr}
       InstanceTenancy: default
       EnableDnsHostnames: true
       EnableDnsSupport: true
@@ -34,7 +34,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Select [0, !Ref AvailabilityZones]
-      CidrBlock: !Ref PubASubnetCidr
+      CidrBlock: !Sub ${PubASubnetCidr}
       VpcId: !Ref VPC
       MapPublicIpOnLaunch: true
       Tags:

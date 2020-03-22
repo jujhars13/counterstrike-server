@@ -25,17 +25,13 @@ Resources:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       # IamInstanceProfile: !Ref CsServerInstanceProfile
-      ImageId: !Ref Linux2Ami
+      ImageId: !Sub ${Linux2Ami}
       InstanceMonitoring: false
-      InstanceType: !Ref instanceType 
+      InstanceType: !Sub ${instanceType} 
       AssociatePublicIpAddress: true
-      SpotPrice: !Ref spotInstancePrice
+      SpotPrice: !Sub "${spotInstancePrice}"
       SecurityGroups: 
         - !Ref CsServerSecurityGroup
-      # UserData:
-      #   Fn::Base64: |
-      #     #!/bin/bash
-      #     echo "this worked " | tee -a /worked.txt
       UserData:
         Fn::Base64: !Ref UserDataScript
 
@@ -49,10 +45,12 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
+          Description: Web from whole internet
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: !Ref myIpAddress
+          CidrIp: !Sub "${myIpAddress}"
+          Description: SSH from my current ip
       VpcId: 
         Fn::ImportValue: !Sub "${stackName}-net-vpc"
       Tags:
