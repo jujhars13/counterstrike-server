@@ -23,3 +23,8 @@ Spin up a Counterstrike 1.6 server in AWS to keep team entertained during Covid-
 # deploy network layer and server
 ./01-deploy.sh
 ```
+
+## TODO
+
+- [ ] move cs server password to parameter store
+- [ ] create scripts to turn server on/off
