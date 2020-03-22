@@ -41,17 +41,37 @@ Resources:
       GroupDescription: SG for cs server
       GroupName: cs-server-sg
       SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-          Description: Web from whole internet
-        - IpProtocol: tcp
+        - Description: SSH from my current ip
+          IpProtocol: tcp
           FromPort: 22
           ToPort: 22
           CidrIp: !Sub "${myIpAddress}"
-          Description: SSH from my current ip
-      VpcId: 
+        - Description: Web from whole internet
+          IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - Description: cs-1.6-svr UDP 26900
+          IpProtocol: udp
+          FromPort: 26900
+          ToPort: 26900
+          CidrIp: 0.0.0.0/0
+        - Description: cs-1.6-svr UDP 27020
+          IpProtocol: udp
+          FromPort: 27020
+          ToPort: 27020
+          CidrIp: 0.0.0.0/0
+        - Description: cs-1.6-svr UDP 27015
+          IpProtocol: udp
+          FromPort: 27015
+          ToPort: 27015
+          CidrIp: 0.0.0.0/0
+        - Description: cs-1.6-svr TCP 27015
+          IpProtocol: tcp
+          FromPort: 27015
+          ToPort: 27015
+          CidrIp: 0.0.0.0/0
+      VpcId:
         Fn::ImportValue: !Sub "${stackName}-net-vpc"
       Tags:
         - Key: Name
