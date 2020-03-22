@@ -2,14 +2,19 @@
 # spins up vpc and then ec2 instance using cloudformation
 # ensure AWS_PROFILE/SECRET_ACCESS are set before
 
+readonly RANDOM_NUM="${RANDOM}"
 readonly FILE_DIRECTORY=$(dirname "${BASH_SOURCE[0]}")
-readonly STACK_NAME="cs-gaming-${RANDOM}"
-readonly BATCH="batch-${RANDOM}"
+readonly STACK_NAME="cs-gaming-${RANDOM_NUM}"
 readonly NOW=$(date +%Y-%m-%dT%H:%M:%S)
-readonly TAGS=("ApplicationName=cs-server" "Batch=${BATCH}" "DateCreation=${NOW}" "StackName=${STACK_NAME}" "Owner=jujhar@jujhar.com")
+readonly TAGS=("ApplicationName=cs-server" "Batch=batch-${RANDOM_NUM}" "DateCreation=${NOW}" "StackName=${STACK_NAME}" "Owner=jujhar@jujhar.com")
 readonly AWS_DEFAULT_REGION="eu-west-2"
-readonly UserDataScript="$(< ${FILE_DIRECTORY}/cloudFormation/ec2-user-data.sh)"
+
+# where shall I open ssh access from?
 readonly myIpAddress="$(curl -s https://ifconfig.me/)/32"
+
+# grab user data script and replace any template vars
+readonly UserDataScript="$(< "${FILE_DIRECTORY}/cloudFormation/ec2-user-data.sh" \
+  sed s/__SERVER_PASSWORD__/Covid19/ )"
 
 echo "Deploying network ${STACK_NAME}"
 # deploy network
@@ -34,7 +39,6 @@ readonly LINUX2_AMI=$(aws ec2 describe-images \
   --query 'reverse(sort_by(Images, &CreationDate))[:1].ImageId' \
   --output text)
 echo "This is the current Linux 2 AMI: ${LINUX2_AMI}"
-
 
 echo "Deploying server ${STACK_NAME}"
 

@@ -52,7 +52,7 @@ docker run -d \
 -e BUY_TIME=0.25 \
 -e FRIENDLY_FIRE=1 \
 -e ADMIN_STEAM=0:1:1234566 \
--e SERVER_PASSWORD=testing \
+-e SERVER_PASSWORD=__SERVER_PASSWORD__ \
 --name cs cs16ds/server:latest +log
 
 echo "Finished $(date)" | tee -a "${logName}"

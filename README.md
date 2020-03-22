@@ -1,8 +1,8 @@
-# CounterStrike Server
+# CounterStrike 1.6 Server
 
 ![cs-logo](logo.jpg)
 
-Spin up a Counterstrike 1.6 server in AWS to keep team entertained during Covid-19 Crisis
+Spin up a Dockerised Counterstrike 1.6 server in AWS to keep team entertained during Covid-19 crisis.
 
 ## Architecture
 
@@ -17,7 +17,6 @@ Spin up a Counterstrike 1.6 server in AWS to keep team entertained during Covid-
 ## To Run
 
 ```bash
-
 # ENSURE you have AWS_PROFILE/AWS_ACCESS_KEY_ID etc exported
 
 # deploy network layer and server
@@ -27,4 +26,4 @@ Spin up a Counterstrike 1.6 server in AWS to keep team entertained during Covid-
 ## TODO
 
 - [ ] move cs server password to parameter store
-- [ ] create scripts to turn server on/off
+- [ ] create scripts to turn server on/off by incr/decr asg min val
