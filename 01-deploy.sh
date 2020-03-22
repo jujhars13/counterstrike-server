@@ -9,8 +9,9 @@ readonly NOW=$(date +%Y-%m-%dT%H:%M:%S)
 readonly TAGS=("ApplicationName=cs-server" "Batch=${BATCH}" "DateCreation=${NOW}" "StackName=${STACK_NAME}" "Owner=jujhar@jujhar.com")
 readonly AWS_DEFAULT_REGION="eu-west-2"
 readonly UserDataScript="$(< ${FILE_DIRECTORY}/cloudFormation/ec2-user-data.sh)"
-readonly myIpAddress="$(curl -s https://ifconfig.me/)"
+readonly myIpAddress="$(curl -s https://ifconfig.me/)/32"
 
+echo "Deploying network ${STACK_NAME}"
 # deploy network
 aws cloudformation deploy \
   --template-file "${FILE_DIRECTORY}/cloudFormation/01-networking.yml" \
@@ -33,6 +34,20 @@ readonly LINUX2_AMI=$(aws ec2 describe-images \
   --output text)
 echo "This is the current Linux 2 AMI: ${LINUX2_AMI}"
 
+readonly vpcId=$(aws ec2 describe-vpcs \
+  --filters "Name=tag:Name,Values=${STACK_NAME}-vpc" \
+  --query "Vpcs[].VpcId" \
+  --output text)
+readonly subnetId=$(aws ec2 describe-subnets \
+--filters "Name=vpc-id,Values=${vpcId}" \
+--query "Subnets[].SubnetId" \
+--output text)
+echo $vpcId
+echo $subnetId
+exit 2
+
+echo "Deploying server ${STACK_NAME}"
+
 # deploys server
 aws cloudformation deploy \
   --template-file "${FILE_DIRECTORY}/cloudFormation/02-server.yml" \
@@ -40,10 +55,10 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_IAM \
   --tags "${TAGS[@]}" \
   --no-fail-on-empty-changeset \
+  --region "${AWS_DEFAULT_REGION}" \
   --parameter-overrides \
       Linux2Ami="${LINUX2_AMI}" \
       UserDataScript="${UserDataScript}" \
       myIpAddress="${myIpAddress}" \
-      vpcName="${STACK_NAME}-net-vpc" \
-      zoneName="${STACK_NAME}-net-pub-a" \
-  --region "${AWS_DEFAULT_REGION}"
+      vpcId="${vpcId}" \
+      subnetId="${subnetId}" 

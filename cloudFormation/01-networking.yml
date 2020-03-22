@@ -78,10 +78,3 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
-
-Outputs:
-  VPC:
-    Description: VPC ID
-    Export:
-      Name: !Sub "${AWS::StackName}-vpc"
-    Value: !Ref VPC
