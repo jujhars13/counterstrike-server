@@ -19,8 +19,9 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_IAM \
   --tags "${TAGS[@]}" \
   --no-fail-on-empty-changeset \
-  --region "${AWS_DEFAULT_REGION}"
-
+  --region "${AWS_DEFAULT_REGION}" \
+  --parameter-overrides \
+      stackName="${STACK_NAME}" \
 # have to wait for VPC  
 aws cloudformation wait \
 stack-exists \
@@ -34,17 +35,6 @@ readonly LINUX2_AMI=$(aws ec2 describe-images \
   --output text)
 echo "This is the current Linux 2 AMI: ${LINUX2_AMI}"
 
-readonly vpcId=$(aws ec2 describe-vpcs \
-  --filters "Name=tag:Name,Values=${STACK_NAME}-vpc" \
-  --query "Vpcs[].VpcId" \
-  --output text)
-readonly subnetId=$(aws ec2 describe-subnets \
---filters "Name=vpc-id,Values=${vpcId}" \
---query "Subnets[].SubnetId" \
---output text)
-echo $vpcId
-echo $subnetId
-exit 2
 
 echo "Deploying server ${STACK_NAME}"
 
@@ -57,8 +47,7 @@ aws cloudformation deploy \
   --no-fail-on-empty-changeset \
   --region "${AWS_DEFAULT_REGION}" \
   --parameter-overrides \
+      stackName="${STACK_NAME}" \
       Linux2Ami="${LINUX2_AMI}" \
       UserDataScript="${UserDataScript}" \
-      myIpAddress="${myIpAddress}" \
-      vpcId="${vpcId}" \
-      subnetId="${subnetId}" 
+      myIpAddress="${myIpAddress}"

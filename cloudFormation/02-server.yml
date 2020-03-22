@@ -1,4 +1,4 @@
-Description: EC2 & ASG setup for Counterstrike gaming server
+Description: EC2 & ASG setup for counterstrike gaming server
 
 Parameters:
   # inject in the latest AMI
@@ -9,16 +9,36 @@ Parameters:
     Type: String
   UserDataScript:
     Type: String
-  SpotInstancePrice:
+  spotInstancePrice:
     Type: String
-    Default: "0.030"
-  vpcId:
+    Default: "0.015"
+  stackName:
     Type: String
-  subnetId:
+  instanceType:
     Type: String
+    Default: t3.medium
 
 Resources:
   # which ports open on this box
+ 
+  CsLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      # IamInstanceProfile: !Ref CsServerInstanceProfile
+      ImageId: !Ref Linux2Ami
+      InstanceMonitoring: false
+      InstanceType: !Ref instanceType 
+      AssociatePublicIpAddress: true
+      SpotPrice: !Ref spotInstancePrice
+      SecurityGroups: 
+        - !Ref CsServerSecurityGroup
+      # UserData:
+      #   Fn::Base64: |
+      #     #!/bin/bash
+      #     echo "this worked " | tee -a /worked.txt
+      UserData:
+        Fn::Base64: !Ref UserDataScript
+
   CsServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -33,28 +53,11 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: !Ref myIpAddress
-      VpcId: !Ref vpcId
+      VpcId: 
+        Fn::ImportValue: !Sub "${stackName}-net-vpc"
       Tags:
         - Key: Name
           Value: !Sub "${AWS::StackName}-sg"
-
-  CsLaunchConfig:
-    Type: AWS::AutoScaling::LaunchConfiguration
-    Properties:
-      # IamInstanceProfile: !Ref CsServerInstanceProfile
-      ImageId: !Ref Linux2Ami
-      InstanceMonitoring: false
-      InstanceType: c5.large
-      AssociatePublicIpAddress: true
-      SpotPrice: !Ref SpotInstancePrice
-      SecurityGroups: 
-        - !Ref CsServerSecurityGroup
-      # UserData:
-      #   Fn::Base64: |
-      #     #!/bin/bash
-      #     echo "this worked " | tee -a /worked.txt
-      UserData:
-        Fn::Base64: !Ref UserDataScript
 
   # ec2 iam-instance-profile
   # CsServerInstanceProfile:
@@ -99,4 +102,9 @@ Resources:
           Value: !Sub "${AWS::StackName}-ASG"
           PropagateAtLaunch: true
       VPCZoneIdentifier:
-        - !Ref subnetId
+        - Fn::ImportValue: !Sub "${stackName}-net-pub-subnet-a"
+
+# Exporting outputs to use in downstream stacks
+Outputs:
+  StackName:
+    Value: !Ref AWS::StackName

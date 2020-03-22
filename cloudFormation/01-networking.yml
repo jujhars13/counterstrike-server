@@ -1,4 +1,4 @@
-Description: VPC setup for Counterstrike gaming server
+Description: VPC setup for counterstrike gaming server
 
 # Default parameters can be overridden by command line execution
 Parameters:
@@ -78,3 +78,18 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
+
+# Exporting outputs to use in downstream stacks
+Outputs:
+  StackName:
+    Value: !Ref AWS::StackName
+  vpcId:
+    Description: VPC id
+    Export:
+      Name: !Sub "${AWS::StackName}-vpc"
+    Value: !Ref VPC
+  SubnetPubAId:
+    Description: SubnetPubA Id
+    Value: !Ref SubnetPubA
+    Export:
+      Name: !Sub "${AWS::StackName}-pub-subnet-a"
