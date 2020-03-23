@@ -11,7 +11,6 @@ Spin up a Dockerised Counterstrike 1.6 server in AWS to keep team entertained du
   - internet gateway
 - single spot EC2 instance
   - brought up with ASG
-  - fixed EIP
   - configured with integrated user-data script
 
 ## To Run
