@@ -13,8 +13,10 @@ readonly AWS_DEFAULT_REGION="eu-west-2"
 readonly myIpAddress="$(curl -s https://ifconfig.me/)/32"
 
 # grab user data script and replace any template vars
-readonly UserDataScript="$(< "${FILE_DIRECTORY}/cloudFormation/ec2-user-data.sh" \
-  sed s/__SERVER_PASSWORD__/Covid19/ )"
+readonly UserDataScript=$(
+  < "${FILE_DIRECTORY}/cloudFormation/ec2-user-data.sh" \
+  sed s/__SERVER_PASSWORD__/Covid19/
+)
 
 echo "Deploying network ${STACK_NAME}"
 # deploy network
@@ -33,11 +35,13 @@ stack-exists \
 --stack-name "${STACK_NAME}-net"
 
 echo "Finding the current Amazon Linuz 2 AMI"
-readonly LINUX2_AMI=$(aws ec2 describe-images \
-  --owners amazon \
-  --filters 'Name=name,Values=amzn2-ami-hvm-2.0.????????.?-x86_64-gp2' 'Name=state,Values=available' \
-  --query 'reverse(sort_by(Images, &CreationDate))[:1].ImageId' \
-  --output text)
+readonly LINUX2_AMI=$(
+  aws ec2 describe-images \
+    --owners amazon \
+    --filters 'Name=name,Values=amzn2-ami-hvm-2.0.????????.?-x86_64-gp2' 'Name=state,Values=available' \
+    --query 'reverse(sort_by(Images, &CreationDate))[:1].ImageId' \
+    --output text
+)
 echo "This is the current Linux 2 AMI: ${LINUX2_AMI}"
 
 echo "Deploying server ${STACK_NAME}"
