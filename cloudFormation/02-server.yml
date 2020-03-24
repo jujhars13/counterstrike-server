@@ -46,11 +46,11 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: !Sub "${myIpAddress}"
-        - Description: Web from whole internet
+        - Description: Web from my current ip for testing
           IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 0.0.0.0/0
+          CidrIp: !Sub "${myIpAddress}"
         - Description: cs-1.6-svr UDP 26900
           IpProtocol: udp
           FromPort: 26900
