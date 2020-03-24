@@ -15,7 +15,8 @@ readonly myIpAddress="$(curl -s https://ifconfig.me/)/32"
 # grab user data script and replace any template vars
 readonly UserDataScript=$(
   < "${FILE_DIRECTORY}/cloudFormation/ec2-user-data.sh" \
-  sed s/__SERVER_PASSWORD__/Covid19/
+  sed s/__SERVER_PASSWORD__/Covid19/ | \
+  sed s/__RCON_PASSWORD__/Covid19Rcon/
 )
 
 echo "Deploying network ${STACK_NAME}"
