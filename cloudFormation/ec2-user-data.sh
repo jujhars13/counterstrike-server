@@ -39,9 +39,9 @@ docker run -d \
 
 echo "get normal docker entrypoint" | tee -a "${logName}"
 # we want to override this from the docker container to customise it
-curl https://raw.githubusercontent.com/JimTouz/counter-strike-docker/master/hlds_run.sh -o /hlds_run.sh
-sed -i '2 a rm -f /opt/hlds/cstrike/addons/amxmodx/configs/maps.ini' /hlds_run.sh
-chmod +x /hlds_run.sh
+curl https://raw.githubusercontent.com/JimTouz/counter-strike-docker/master/hlds_run.sh -o /custom-entrypoint.sh
+sed -i '2 a rm -f /opt/hlds/cstrike/addons/amxmodx/configs/maps.ini' /custom-entrypoint.sh
+chmod +x /custom-entrypoint.sh
 
 echo "Starting CS server" | tee -a "${logName}"
 # courtesy of https://github.com/JimTouz/counter-strike-docker
@@ -52,7 +52,7 @@ docker run -d \
   -p 27015:27015/udp \
   -p 27015:27015 \
   -e MAXPLAYERS=32 \
-  -e START_MAP=de_dust2 \
+  -e START_MAP=fy_snow \
   -e SERVER_NAME="Economist C19 game server" \
   -e START_MONEY=16000 \
   -e BUY_TIME=1 \
@@ -60,8 +60,9 @@ docker run -d \
   -e ADMIN_STEAM=0:1:1234566 \
   -e SERVER_PASSWORD=__SERVER_PASSWORD__ \
   -e RCON_PASSWORD=__RCON_PASSWORD__ \
-  -v /hlds_run.sh:/bin/hlds_run.sh \
+  -v /custom-entrypoint.sh:/bin/custom-entrypoint.sh \
   --name cs \
+  --entrypoint=/bin/custom-entrypoint.sh \
   cs16ds/server:latest +log
 
 echo "Finished $(date)" | tee -a "${logName}"
